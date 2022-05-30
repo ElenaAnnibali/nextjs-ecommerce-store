@@ -9,7 +9,7 @@ function MyApp({ Component, pageProps }) {
           body {
             padding: 0;
             margin: 0;
-            // font-family: 'Chakra Petch', sans-serif;
+            font-family: 'Orbitron', sans-serif;
           }
           * {
             box-sizing: border-box;
