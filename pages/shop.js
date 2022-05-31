@@ -3,7 +3,7 @@ import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
 import Layout from '../components/Layout.js';
-import { bikesDatabase } from '../util/bikesDatabase';
+import { getBikes } from '../util/bikesDatabase';
 
 const mainStyles = css`
   font-family: 'Orbitron', sans-serif;
@@ -194,6 +194,9 @@ export default function Shop(props) {
                       <div>
                         <strong>Price:</strong> <br /> {bike.price} €
                       </div>
+                      <div>
+                        <strong>In stock:</strong> <br /> {bike.inStockQuantity}
+                      </div>
                       <button css={buttonStyles}>See more</button>
                     </div>
                   </div>
@@ -207,13 +210,14 @@ export default function Shop(props) {
   );
 }
 
-export function getServerSideProps() {
+export async function getServerSideProps() {
+  const bikes = await getBikes();
   return {
     // Anything that you pass in the props
     // object will get passed to the component
     // at the top in the `props` parameter
     props: {
-      bikes: bikesDatabase,
+      bikes: bikes,
     },
   };
 }

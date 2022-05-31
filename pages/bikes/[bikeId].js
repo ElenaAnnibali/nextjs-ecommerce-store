@@ -1,8 +1,10 @@
 import { css } from '@emotion/react';
 import Head from 'next/head';
 import Image from 'next/image';
+import { useState } from 'react';
 import Layout from '../../components/Layout';
-import { bikesDatabase } from '../../util/bikesDatabase';
+import { getbike } from '../../util/bikesDatabase';
+import { getParsedCookie, setStringifiedCookie } from '../../util/cookies';
 
 const mainStyles = css`
   min-height: 100vh;
@@ -105,6 +107,9 @@ const buttonStyles = css`
 `;
 
 export default function Bike(props) {
+  const [selectedQuantity, setSelectedQuantity] = useState(1);
+  console.log('selected quantity: ', selectedQuantity);
+
   if (!props.bike) {
     return (
       <div>
@@ -153,27 +158,69 @@ export default function Bike(props) {
               <div>
                 <strong>price:</strong> {props.bike.price} €
               </div>
+              <div>
+                <strong>in stock:</strong> {props.bike.inStockQuantity}
+              </div>
             </div>
           </div>
         </div>
-        <button css={buttonStyles}>Shop now</button>
+        <label>
+          Amount
+          <input
+            type="number"
+            name="quantity"
+            min="1"
+            max={props.bike.inStockQuantity}
+            defaultValue="1"
+            onChange={(event) => {
+              setSelectedQuantity(event.currentTarget.value);
+            }}
+          />
+        </label>
+        <button
+          css={buttonStyles}
+          onClick={() => {
+            const currentCart = getParsedCookie('cart')
+              ? getParsedCookie('cart')
+              : [];
+            console.log(currentCart);
+
+            const selectedBike = currentCart.find(
+              (bike) => bike.id === props.bike.id,
+            );
+
+            if (selectedBike) {
+              selectedBike.bikeQuantity =
+                Number(selectedBike.bikeQuantity) + Number(selectedQuantity);
+              console.log(currentCart);
+              setStringifiedCookie('cart', currentCart);
+            } else {
+              const updatedCart = [
+                ...currentCart,
+                {
+                  id: props.bike.id,
+                  name: props.bike.name,
+                  quantity: selectedQuantity,
+                },
+              ];
+              setStringifiedCookie('cart', updatedCart);
+              console.log(updatedCart);
+            }
+          }}
+        >
+          Shop now
+        </button>
       </main>
     </Layout>
   );
 }
 
-export function getServerSideProps(context) {
-  const foundBike = bikesDatabase.find((bike) => {
-    return bike.id === context.query.bikeId;
-  });
-
-  if (!foundBike) {
-    context.res.statusCode = 404;
-  }
+export async function getServerSideProps(context) {
+  const bike = await getbike(context.query.bikeId);
 
   return {
     props: {
-      bike: foundBike || null,
+      bike: bike,
     },
   };
 }
