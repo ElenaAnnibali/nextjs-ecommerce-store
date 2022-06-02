@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { bikesDatabase as bikeItems } from '../util/bikesDatabase';
+import { getBikes as bikeItems } from '../util/bikesDatabase';
 import { setStringifiedCookie } from '../util/cookies';
 
 export default function Cart(props) {
@@ -10,11 +10,10 @@ export default function Cart(props) {
   useEffect(() => {
     function totalSum() {
       let total = 0;
-      cart.map((itemOnCart) => {
-        return (total +=
-          bikeItems.find((bike) => {
-            return itemOnCart.id === bike.id;
-          }).itemPrice * itemOnCart.itemQuantity);
+      cart.map((itemOnCart)=> {
+        bikeItems.find((bike) => {
+          return itemONCart.id === bike.id;
+        }).itemPrice * itemOnCart.itemQuantity);
       });
       setSum(total);
     }

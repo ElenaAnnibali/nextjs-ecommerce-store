@@ -65,7 +65,10 @@ export default function Header() {
         <div css={iconStyles}>
           <span className="material-symbols-outlined">search</span>
           <span className="material-symbols-outlined">favorite</span>
-          <span className="material-symbols-outlined">shopping_bag</span>
+
+          <Link href="/cart">
+            <span className="material-symbols-outlined">shopping_bag</span>
+          </Link>
         </div>
       </div>
     </header>
