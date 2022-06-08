@@ -48,6 +48,7 @@ const iconStyles = css`
   justify-content: right;
   gap: 30px;
   padding-left: 0;
+  cursor: pointer;
 `;
 
 export default function Header() {

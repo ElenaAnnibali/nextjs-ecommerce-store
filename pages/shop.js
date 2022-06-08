@@ -2,7 +2,7 @@ import { css } from '@emotion/react';
 import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
-import Layout from '../components/Layout.js';
+import Layout from '../components/Layout';
 import { getBikes } from '../util/bikesDatabase';
 
 const mainStyles = css`
@@ -15,10 +15,6 @@ const mainStyles = css`
   a {
     text-decoration: none;
     color: #1a0000;
-
-    :hover {
-      color: #9e003d;
-    }
   }
 `;
 
@@ -80,6 +76,10 @@ const bikeContainerStyles = css`
   display: flex;
   flex-direction: column;
   justify-content: center;
+`;
+
+const imageStyles = css`
+  margin-top: 60px;
 `;
 
 const bikeSubcontainerStyles = css`
@@ -182,12 +182,19 @@ export default function Shop(props) {
               <div key={`bike-${bike.id}`}>
                 <div css={bikeSubcontainerStyles}>
                   <div>
-                    <Image src={`/${bike.id}.jpg`} width={700} height={400} />
+                    <Image
+                      src={`/${bike.id}.jpg`}
+                      width={700}
+                      height={400}
+                      css={imageStyles}
+                    />
                   </div>
                   <div>
                     <div css={bikeTextStyles}>
-                      <strong>Name:</strong>
-                      <Link href={`/bikes/${bike.id}`}>{bike.name}</Link>
+                      <div>
+                        <strong>Name:</strong> <br />
+                        {bike.name}
+                      </div>
                       <div>
                         <strong>Type:</strong> <br /> {bike.type}
                       </div>
@@ -197,7 +204,12 @@ export default function Shop(props) {
                       <div>
                         <strong>In stock:</strong> <br /> {bike.inStockQuantity}
                       </div>
-                      <button css={buttonStyles}>See more</button>
+                      <Link
+                        href={`/bikes/${bike.id}`}
+                        // data-test-id="product-<product id>"
+                      >
+                        <button css={buttonStyles}>See more</button>
+                      </Link>
                     </div>
                   </div>
                 </div>

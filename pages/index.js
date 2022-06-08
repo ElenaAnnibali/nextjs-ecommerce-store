@@ -1,7 +1,7 @@
 import { css } from '@emotion/react';
 import Head from 'next/head';
 import Image from 'next/image';
-import Layout from '../components/Layout.js';
+import Layout from '../components/Layout';
 
 const mainStyles = css`
   min-height: 140vh;
