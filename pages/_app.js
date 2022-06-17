@@ -1,5 +1,7 @@
 import { css, Global } from '@emotion/react';
+import Cookies from 'js-cookie';
 import { useEffect, useState } from 'react';
+import Layout from '../components/Layout.js';
 import { getLocalStorage, setLocalStorage } from '../util/localStorage.js';
 
 const cookieBannerStyles2 = (isOpen) => css`
@@ -63,6 +65,7 @@ const cookieButtonStyles = css`
 
 function MyApp({ Component, pageProps }) {
   const [areCookiesAccepted, setAreCookiesAccepted] = useState(false);
+  const [cartCounter, setCartCounter] = useState([]);
 
   function cookieBannerButtonHandler() {
     // 2. set the value for the cookieBanner
@@ -76,6 +79,17 @@ function MyApp({ Component, pageProps }) {
     if (getLocalStorage('areCookiesAccepted')) {
       setAreCookiesAccepted(getLocalStorage('areCookiesAccepted'));
     }
+  }, []);
+
+  useEffect(() => {
+    const showAmount = async () => {
+      const updatedCart = await (Cookies.get('cart')
+        ? JSON.parse(Cookies.get('cart'))
+        : []);
+      console.log('from inside UseEffect', updatedCart);
+      setCartCounter(updatedCart);
+    };
+    showAmount().catch(console.error);
   }, []);
 
   return (
@@ -110,7 +124,9 @@ function MyApp({ Component, pageProps }) {
           Got it
         </button>
       </div>
-      <Component {...pageProps} />
+      <Layout cartCounter={cartCounter}>
+        <Component {...pageProps} setCartCounter={setCartCounter} />
+      </Layout>
     </>
   );
 }

@@ -3,35 +3,51 @@ import { GetServerSidePropsContext } from 'next';
 import Head from 'next/head';
 import Image from 'next/image';
 import { ChangeEvent, useState } from 'react';
-import Layout from '../../components/Layout';
-import { getBike } from '../../util/bikesDatabase';
+import { DatabaseType, getBike } from '../../util/bikesDatabase';
 import { getParsedCookie, setStringifiedCookie } from '../../util/cookies';
 import { queryParamToNumber } from '../../util/queryParam';
 
 const mainStyles = css`
-  min-height: 100vh;
+  min-height: 80vh;
+`;
+
+const marginTopStyles = css`
+  padding-top: 70px;
+`;
+
+const titleSectionStyles = css`
+  max-width: 1680px;
+  max-height: 147.01px;
+  border-top: 1px solid #2b3826;
+  border-bottom: 1px solid #2b3826;
+
+  div {
+    max-width: 1120px;
+    border-right: 1px solid #2b3826;
+  }
 `;
 
 const h1Styles = css`
   font-family: 'Orbitron', sans-serif;
   text-align: center;
-  padding-top: 80px;
+  padding-top: 10px;
+  padding-bottom: 10px;
   font-size: 40px;
+  margin-top: 0;
+  margin-bottom: 0;
+`;
+
+const twinSectionStyles = css`
+  display: flex;
+  max-width: 1680px;
+  max-height: 492px;
+
+  border-bottom: 1px solid #2b3826;
 `;
 
 const productStyles = css`
-  display: flex;
-  gap: 20px;
-  justify-content: space-evenly;
-  margin-left: 200px;
-  margin-bottom: 25px;
-  background-color: #fffbe8;
-  border-radius: 4px;
-  padding: 10px;
-  border-color: rgba(0, 0, 0, 0.15);
-  border-style: solid;
-  border-width: 1px;
-  max-width: 1200px;
+  max-width: 775.38px;
+  border-right: 1px solid #2b3826;
 `;
 
 const infoStyles = css`
@@ -42,11 +58,9 @@ const infoStyles = css`
   font-size: 20px;
   line-height: 3rem;
   text-align: justify;
-  align-items: stretch;
-  max-width: 1100px;
-  max-height: 600px;
-  margin-right: 50px;
-  margin-top: 40px;
+  margin-top: 20px;
+  margin-right: 250px;
+  margin-left: 20px;
 `;
 
 const buttonStyles = css`
@@ -71,7 +85,6 @@ const buttonStyles = css`
   user-select: none;
   -webkit-user-select: none;
   touch-action: manipulation;
-  margin-left: 800px;
 
   :after {
     background-color: #111;
@@ -108,8 +121,17 @@ const buttonStyles = css`
   }
 `;
 
-const quantityStyles = css`
+const infoButtonStyles = css`
   display: flex;
+  flex-direction: column;
+`;
+
+const inputButtonStyles = css`
+  display: flex;
+  gap: 50px;
+`;
+
+const quantityStyles = css`
   justify-content: center;
   font-family: 'Orbitron', sans-serif;
   font-size: 16px;
@@ -117,149 +139,188 @@ const quantityStyles = css`
   margin-left: 80px;
 `;
 
+const inputStyles = css`
+  padding: 10px;
+  border-radius: 4px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 16px;
+
+  border-color: rgba(0, 0, 0, 0.733);
+  margin-left: 10px;
+
+  :focus {
+    outline: none;
+    border-color: #b75200;
+  }
+`;
+
 export type CartItem = {
-  id: string;
-  // name: string;
+  id: string | number;
   quantity: number;
 };
 
 type Props = {
-  bike: {
-    name: string;
-    type: string;
-    status: string;
-    id: string;
-    price: number;
-    inStockQuantity: number;
-  };
+  superProduct: DatabaseType;
+  cartCounter: number;
+  setCartCounter?: any;
 };
 
 export default function Bike(props: Props) {
-  const [selectedQuantity, setSelectedQuantity] = useState(1);
+  const [selectedQuantity, setSelectedQuantity] = useState(
+    props.superProduct.inStockQuantity | 1,
+  );
   console.log('selected quantity: ', selectedQuantity);
 
   function handleChange(event: ChangeEvent<HTMLInputElement>) {
-    setSelectedQuantity(parseInt(event.currentTarget.value));
+    setSelectedQuantity(Number(event.currentTarget.value));
+    const currentCart = getParsedCookie('cart') ? getParsedCookie('cart') : [];
+    setStringifiedCookie('cart', currentCart);
   }
 
-  if (!props.bike) {
+  if (!props.superProduct) {
     return (
       <div>
         <Head>
-          <title>Bike not found</title>
+          <title>Product not found</title>
           <meta
             name="description"
-            content="Unfortunately, we have had trouble locating the bike you are looking for."
+            content="Unfortunately, we have had trouble locating the product you are looking for."
           />
         </Head>
 
-        <h1>Bike not found</h1>
+        <h1>Product not found</h1>
       </div>
     );
   }
 
   return (
-    <Layout>
+    <>
       <Head>
-        <title>{props.bike.name}</title>
+        <title>{props.superProduct.name}</title>
         <meta
           name="description"
-          content={`${props.bike.name} is a ${props.bike.type}. ${props.bike.status}`}
+          content={`${props.superProduct.name} is a ${props.superProduct.type}. ${props.superProduct.status}`}
         />
       </Head>
       <main css={mainStyles}>
-        <h1 css={h1Styles}>{props.bike.name}</h1>
-
-        <div>
-          <div css={productStyles}>
+        <div css={marginTopStyles}>
+          <div css={titleSectionStyles}>
             <div>
-              <Image
-                className="image"
-                data-test-id="product-image"
-                src={`/${props.bike.id}.jpg`}
-                width={1200}
-                height={800}
-              />
-            </div>
-            <div css={infoStyles}>
-              <div>
-                <strong>type:</strong> {props.bike.type}
-              </div>
-              <div>
-                <strong>description:</strong> {props.bike.status}
-              </div>
-              <div data-test-id="product-price">
-                <strong>price:</strong> {props.bike.price} €
-              </div>
-              <div>
-                <strong>in stock:</strong> {props.bike.inStockQuantity}
-              </div>
+              <h1 css={h1Styles}>{props.superProduct.name}</h1>
             </div>
           </div>
         </div>
-        <div css={quantityStyles} data-test-id="product-quantity">
-          <label>
-            Quantity:
-            <input
-              type="number"
-              name="quantity"
-              min="1"
-              max={props.bike.inStockQuantity}
-              defaultValue="1"
-              onChange={handleChange}
+
+        <div css={twinSectionStyles}>
+          <div css={productStyles}>
+            <Image
+              className="image"
+              data-test-id="product-image"
+              src={`/${props.superProduct.id}.jpg`}
+              width={1200}
+              height={800}
             />
-          </label>
+          </div>
+          <div css={infoButtonStyles}>
+            <div css={infoStyles}>
+              <div>
+                <strong>type:</strong> {props.superProduct.type}
+              </div>
+              <div>
+                <strong>description:</strong> {props.superProduct.status}
+              </div>
+              <div data-test-id="product-price">
+                <strong>price:</strong> {props.superProduct.price} €
+              </div>
+              <div>
+                <strong>in stock:</strong> {props.superProduct.inStockQuantity}
+              </div>
+            </div>
+
+            <div css={inputButtonStyles}>
+              <div css={quantityStyles} data-test-id="product-quantity">
+                <label>
+                  Quantity:
+                  <input
+                    type="number"
+                    name="quantity"
+                    min="1"
+                    max={props.superProduct.inStockQuantity}
+                    defaultValue="1"
+                    onChange={handleChange}
+                    css={inputStyles}
+                  />
+                </label>
+              </div>
+              <button
+                data-test-id="product-add-to-cart"
+                css={buttonStyles}
+                onClick={() => {
+                  const currentCart = getParsedCookie('cart')
+                    ? getParsedCookie('cart')
+                    : [];
+                  console.log(currentCart);
+
+                  const selectedBike = currentCart.find(
+                    (bike: CartItem) => bike.id === props.superProduct.id,
+                  );
+
+                  if (selectedBike) {
+                    selectedBike.quantity =
+                      Number(selectedBike.quantity) + Number(selectedQuantity);
+                    console.log(currentCart);
+                    setStringifiedCookie('cart', currentCart);
+                    props.setCartCounter(
+                      Number(props.cartCounter) + Number(selectedQuantity),
+                    );
+                  } else {
+                    const updatedCart = [
+                      ...currentCart,
+                      {
+                        id: props.superProduct.id,
+                        // name: props.bike.name,
+                        quantity: selectedQuantity,
+                      },
+                    ];
+                    setStringifiedCookie('cart', updatedCart);
+                    props.setCartCounter(Number(props.cartCounter) + 1);
+                    console.log(updatedCart);
+                  }
+                }}
+              >
+                Shop now
+              </button>
+            </div>
+          </div>
         </div>
-        <button
-          data-test-id="product-add-to-cart"
-          css={buttonStyles}
-          onClick={() => {
-            const currentCart = getParsedCookie('cart')
-              ? getParsedCookie('cart')
-              : [];
-            console.log(currentCart);
-
-            const selectedBike = currentCart.find(
-              (bike: CartItem) => bike.id === props.bike.id,
-            );
-
-            if (selectedBike) {
-              selectedBike.bikeQuantity =
-                Number(selectedBike.bikeQuantity) + Number(selectedQuantity);
-              console.log(currentCart);
-              setStringifiedCookie('cart', currentCart);
-            } else {
-              const updatedCart = [
-                ...currentCart,
-                {
-                  id: props.bike.id,
-                  // name: props.bike.name,
-                  quantity: selectedQuantity,
-                },
-              ];
-              setStringifiedCookie('cart', updatedCart);
-              console.log(updatedCart);
-            }
-          }}
-        >
-          Shop now
-        </button>
       </main>
-    </Layout>
+    </>
   );
 }
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   const bikeId = queryParamToNumber(context.query.bikeId);
-  const bike = await getBike(bikeId);
 
-  if (!bike) {
+  const cart = JSON.parse(context.req.cookies.cart || '[]');
+
+  const product = await getBike(bikeId);
+
+  if (!product) {
     context.res.statusCode = 404;
+    return {
+      props: {
+        superProduct: null,
+      },
+    };
   }
+
+  const productInCart = cart.find((item: CartItem) => product.id === item.id);
+
+  const superProduct = { ...product, ...productInCart };
 
   return {
     props: {
-      bike: bike || null,
+      superProduct: superProduct,
     },
   };
 }

@@ -4,7 +4,6 @@ import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import Layout from '../components/Layout';
 import { getBikes } from '../util/bikesDatabase';
 import { getParsedCookie, setStringifiedCookie } from '../util/cookies';
 
@@ -17,9 +16,7 @@ const spanStyles = css`
   gap: 80px;
   font-size: 20px;
   margin-bottom: 50px;
-  border-bottom-color: rgba(0, 0, 0, 0.15);
-  border-bottom-style: solid;
-  border-bottom-width: 1px;
+  border-bottom: 1px solid #2b3826;
   padding-bottom: 30px;
 `;
 
@@ -35,28 +32,46 @@ const spanPriceStyles = css`
 const emptyCartStyles = css`
   font-family: 'Orbitron', sans-serif;
   text-align: center;
-  margin-top: 150px;
+  padding-top: 150px;
   min-height: 63vh;
 `;
 
 const cartStyles = css`
   font-family: 'Orbitron', sans-serif;
-
   h1 {
     text-align: center;
-    margin-top: 40px;
-    margin-bottom: 60px;
+    padding-top: 40px;
+    padding-bottom: 60px;
+    margin: 0;
+    margin: 0;
+    margin: 0;
+    top: 50%;
+    left: 50%;
+    line-height: 3rem;
+    text-align: center;
+    padding-top: 30px;
+    text-shadow: 1px 1px 1px #3c5c5e;
+    font-family: 'Orbitron', sans-serif;
+    font-style: normal;
+    font-weight: 800;
+    font-stretch: normal;
+    font-size: 40px;
+    line-height: 1.2;
+    margin: 0;
+    color: #fcf8f9;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    text-shadow: -1px -1px 0px #444, 1px -1px 1px #444, -1px 1px 1px #444,
+      1px 1px 0px #444;
   }
 `;
 
 const containerStyles = css`
   display: flex;
-  gap: 60px;
-  margin-left: 300px;
-  padding-bottom: 30px;
-  border-bottom-color: rgba(0, 0, 0, 0.15);
-  border-bottom-style: solid;
-  border-bottom-width: 1px;
+  gap: 55px;
+  // margin-left: 300px;
+  // padding-bottom: 60px;
+  // margin-bottom: 30px;
 `;
 
 const nameAndRemoveStyles = css`
@@ -69,6 +84,8 @@ const nameAndRemoveStyles = css`
 
 const imageStyles = css`
   margin-right: 40px;
+  margin-left: 300px;
+  margin-bottom: 30px;
 `;
 
 const priceStyles = css`
@@ -77,6 +94,15 @@ const priceStyles = css`
 
 const quantityStyles = css`
   margin-right: 50px;
+
+  div {
+    display: flex;
+    gap: 10px;
+  }
+`;
+
+const inStockQuantityStyles = css`
+  margin-right: 188px;
 `;
 
 const buttonStyles = css`
@@ -103,32 +129,32 @@ const buttonStyles = css`
   touch-action: manipulation;
   vertical-align: top;
   white-space: nowrap;
-
   :active {
     border-color: #ac716c;
     outline: 0;
   }
-
   :focus {
     border-color: #612c23;
     outline: 0;
   }
-
   :hover {
     border-color: #ac716c;
   }
-
   :focus:not(:active) {
     box-shadow: rgba(72, 95, 199, 0.25) 0 0 0 0.125em;
   }
 `;
 
 const secondContainerStyles = css`
-  display: flex;
-  justify-content: right;
-  gap: 30px;
-  padding-top: 30px;
-  margin-right: 265px;
+  border-top: 1px solid #2b3826;
+
+  div {
+    display: flex;
+    justify-content: right;
+    gap: 30px;
+    padding-top: 30px;
+    margin-right: 25px;
+  }
 
   button {
     align-items: center;
@@ -154,30 +180,40 @@ const secondContainerStyles = css`
     touch-action: manipulation;
     vertical-align: top;
     white-space: nowrap;
-
     :active {
       border-color: #ac716c;
       outline: 0;
     }
-
     :focus {
       border-color: #612c23;
       outline: 0;
     }
-
     :hover {
       border-color: #ac716c;
     }
-
     :focus:not(:active) {
       box-shadow: rgba(72, 95, 199, 0.25) 0 0 0 0.125em;
     }
   }
 `;
 
+const shopCheckoutStyles = css`
+  display: flex;
+`;
+
+const totalAmountAndPriceStyles = css`
+  display: flex;
+  flex-direction: column;
+
+  span {
+    text-align: right;
+  }
+`;
+
 export default function Cart(props) {
-  const [productsInCart, setProductsInCart] = useState([]);
+  const [productsInCart, setProductsInCart] = useState(props.findproducts);
   const [sum, setSum] = useState(0);
+  const [totalPrice, setTotalPrice] = useState(0);
 
   // get cookies from shopping page with useEffect
   useEffect(() => {
@@ -191,23 +227,36 @@ export default function Cart(props) {
     totalAmount += productsInCart[i].quantity;
   }
 
-  // calculate Sum with UseEffect
   useEffect(() => {
-    function caluclateTotalAmount() {
-      let total = 0;
+    function calculateTotalPrice() {
+      let totalP = 0;
       productsInCart.map((productInCart) => {
-        return (total +=
-          props.product.find((product) => {
-            return productInCart.id === product.id;
-          }).price * productInCart.quantity);
+        return (totalP += props.product.find((product) => {
+          return productInCart.id === product.id;
+        }).price);
       });
-      setSum(total);
+      setTotalPrice(totalP);
     }
-    caluclateTotalAmount();
+    calculateTotalPrice();
   }, [productsInCart, props.product]);
 
+  // calculate Sum with UseEffect
+  // useEffect(() => {
+  //   function calculateGranTotalPrice() {
+  //     let total = 0;
+  //     productsInCart.map((productInCart) => {
+  //       return (total +=
+  //         props.product.find((product) => {
+  //           return productInCart.id === product.id;
+  //         }).price * productInCart.quantity);
+  //     });
+  //     setSum(total);
+  //   }
+  //   calculateGranTotalPrice();
+  // }, [productsInCart, props.product]);
+
   return (
-    <Layout>
+    <>
       <Head>
         <title>Shopping Cart</title>
         <meta
@@ -227,6 +276,7 @@ export default function Cart(props) {
               <h1>Shopping Cart</h1>
               <div css={spanStyles}>
                 <span css={articleStyles}>Article</span>
+                <span>Quantity in stock</span>
                 <span css={spanPriceStyles}>Price</span>
                 <span>Quantity</span>
                 <span>Total</span>
@@ -247,7 +297,7 @@ export default function Cart(props) {
                         {/* product name */}
                         <div>
                           {
-                            props.product.find((product) => {
+                            props.products.find((product) => {
                               return productInCart.id === product.id;
                             }).name
                           }
@@ -272,42 +322,106 @@ export default function Cart(props) {
                           remove
                         </button>
                       </div>
+                      <div css={inStockQuantityStyles}>
+                        {
+                          props.products.find((product) => {
+                            return productInCart.id === product.id;
+                          }).inStockQuantity
+                        }
+                      </div>
                       {/* product price */}
                       <div css={priceStyles}>
-                        {props.product.find((product) => {
-                          return productInCart.id === product.id;
-                        }).price * productInCart.quantity}{' '}
+                        {
+                          props.products.find((product) => {
+                            return productInCart.id === product.id;
+                          }).price
+                        }{' '}
                         €
                       </div>
 
                       <div css={quantityStyles}>
-                        <label>
-                          <input
-                            type="number"
-                            min="1"
-                            max={
-                              props.product.find((product) => {
-                                return productInCart.id === product.id;
-                              }).inStockQuantity
-                            }
-                            defaultValue={productInCart.quantity}
-                            onChange={(event) => {
-                              console.log(event);
-                              const updatedCart = productInCart.slice();
-                              updatedCart.find((product) => {
-                                return product.id === productInCart.id;
-                              }).quantity = Number(event.currentTarget.value);
-                              totalAmount();
-                              console.log(totalAmount);
-                              console.log('updated cart:', updatedCart);
-                              setStringifiedCookie('cart', updatedCart);
-                              setProductsInCart(updatedCart);
+                        <div>
+                          <button
+                            css={buttonStyles}
+                            onClick={() => {
+                              const updatedCart = productsInCart.find(
+                                (product) => product.id === productInCart.id,
+                              );
+                              const inStockQuantity = props.products.find(
+                                (product) => productInCart.id === product.id,
+                              ).inStockQuantity;
+                              console.log(
+                                'In stock quantity:',
+                                inStockQuantity,
+                              );
+
+                              const totalP = props.products.find(
+                                (product) => productInCart.id === product.id,
+                              ).price;
+
+                              const priceSum =
+                                updatedCart.quantity < inStockQuantity
+                                  ? totalPrice + Number(totalP)
+                                  : totalPrice;
+                              console.log('price Sum ', priceSum);
+
+                              updatedCart.quantity < inStockQuantity
+                                ? (updatedCart.quantity += 1)
+                                : (updatedCart.quantity += 0);
+
+                              setStringifiedCookie('cart', productsInCart);
+                              setProductsInCart([...productsInCart]);
+                              props.setCartCounter(
+                                Number(props.cartCounter) ===
+                                  updatedCart.quantity,
+                              );
+                              setTotalPrice(priceSum);
                             }}
-                          />
-                        </label>
+                          >
+                            +
+                          </button>
+                          <span>{props.cartCounter}</span>
+                          <button
+                            css={buttonStyles}
+                            onClick={() => {
+                              const updatedCart = productsInCart.find(
+                                (product) => product.id === productInCart.id,
+                              );
+
+                              updatedCart.quantity > 0
+                                ? (updatedCart.quantity -= 1)
+                                : (updatedCart.quantity -= 0);
+
+                              const totalP = props.product.find(
+                                (product) => productInCart.id === product.id,
+                              ).price;
+
+                              const priceSum =
+                                totalPrice > 0
+                                  ? totalPrice - Number(totalP)
+                                  : totalPrice;
+                              console.log('price Sum ', priceSum);
+
+                              setStringifiedCookie('cart', productsInCart);
+                              setProductsInCart([...productsInCart]);
+                              props.setCartCounter(
+                                Number(props.cartCounter) - 1,
+                              );
+                              setTotalPrice(priceSum);
+                            }}
+                          >
+                            {' '}
+                            -{' '}
+                          </button>
+                        </div>
                       </div>
                       <div>
-                        <span>{sum} €</span>
+                        {Number(
+                          productsInCart.find(
+                            (product) => product.id === productInCart.id,
+                          ).quantity,
+                        ) * Number(totalPrice)}
+                        €
                       </div>
                     </div>
                   );
@@ -315,19 +429,25 @@ export default function Cart(props) {
               </div>
               <div>
                 <div css={secondContainerStyles}>
-                  <Link href="/shop">
-                    <button>Continue shopping</button>
-                  </Link>
-                  <Link href="/checkout">
-                    <button>Checkout</button>
-                  </Link>
+                  <div css={totalAmountAndPriceStyles}>
+                    <span>Total amount: {totalAmount}</span>
+                    <span>Total Price: {sum}</span>
+                  </div>
+                  <div css={shopCheckoutStyles}>
+                    <Link href="/shop">
+                      <button>Continue shopping</button>
+                    </Link>
+                    <Link href="/checkout">
+                      <button>Checkout</button>
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>
           )}
         </div>
       </main>
-    </Layout>
+    </>
   );
 }
 
@@ -336,10 +456,27 @@ export async function getServerSideProps(context) {
 
   const cart = JSON.parse(context.req.cookies.cart || '[]');
 
+  const foundproducts = [];
+
+  for (const cartProduct in cart) {
+    const productFromDB = product.find((item) => {
+      return item.id === cartProduct.id;
+    });
+    if (!productFromDB) {
+      console.log(
+        'An error occured: could not find the requested product in the datatbase',
+      );
+      context.res.statusCode = 404;
+      break;
+    }
+    const superProduct = { ...productFromDB, ...cartProduct };
+
+    foundproducts.push(superProduct);
+  }
+
   return {
     props: {
-      cart: cart,
-      product: product,
+      foundproducts: foundproducts,
     },
   };
 }

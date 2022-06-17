@@ -1,12 +1,40 @@
 import { css } from '@emotion/react';
 import Head from 'next/head';
-import Layout from '../components/Layout';
+import Image from 'next/image';
+import { useRouter } from 'next/router';
 import { getBikes } from '../util/bikesDatabase';
+import { setStringifiedCookie } from '../util/cookies';
 
 const mainStyles = css`
   text-align: center;
   font-family: 'Orbitron', sans-serif;
   min-height: 120vh;
+
+  h1 {
+    border-bottom: 1px solid #2b3826;
+    margin: 0;
+    padding-bottom: 20px;
+    margin: 0;
+    margin: 0;
+    top: 50%;
+    left: 50%;
+    line-height: 3rem;
+    text-align: center;
+    padding-top: 30px;
+    text-shadow: 1px 1px 1px #3c5c5e;
+    font-family: 'Orbitron', sans-serif;
+    font-style: normal;
+    font-weight: 800;
+    font-stretch: normal;
+    font-size: 40px;
+    line-height: 1.2;
+    margin: 0;
+    color: #fcf8f9;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    text-shadow: -1px -1px 0px #444, 1px -1px 1px #444, -1px 1px 1px #444,
+      1px 1px 0px #444;
+  }
 `;
 
 const formStyles = css`
@@ -20,16 +48,48 @@ const formWrapperStyles = css`
   display: flex;
   flex-direction: column;
 
+  input,
+  label {
+    display: flex;
+    flex-direction: column;
+  }
+
+  input {
+    border: 2px solid #2b3826;
+    box-shadow: inset 4px 4px 2px rgb(36 29 39 / 5%),
+      inset 1px 1px 2px 2px rgb(36 29 39 / 5%);
+    border-radius: 10px;
+    padding: 10px !important;
+    margin-top: 4px !important;
+
+    :focus {
+      outline: none;
+      border-color: #b75200;
+    }
+  }
+
   span {
     margin-right: 20px;
   }
+`;
+
+const sectionsStyles = css`
+  display: flex;
+  justify-content: center;
+  gap: 50px;
+`;
+
+const firstSectionStyles = css`
+  display: flex;
+  flex-direction: column;
+  margin-right: 100px;
 `;
 
 const buttonStyles = css`
   align-items: center;
   appearance: none;
   background-color: #fffbe8;
-  border: 1px solid #dbdbdb;
+  border: 2px solid #2b3826;
   border-radius: 0.375em;
   box-shadow: none;
   box-sizing: border-box;
@@ -69,7 +129,24 @@ const buttonStyles = css`
   }
 `;
 
-export default function checkout(props) {
+const secondSectionStyles = css`
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid #2b3826;
+  padding-left: 280px;
+  input {
+    margin-bottom: 20px;
+  }
+`;
+
+const preventDefault = (f) => (e) => {
+  e.preventDefault();
+  f(e);
+};
+
+export default function Checkout(props, { action = '/thankyou' }) {
+  const router = useRouter();
+
   function calculateTotalSum() {
     let total = 0;
     props.cart.map((productInCart) => {
@@ -81,8 +158,20 @@ export default function checkout(props) {
     return total;
   }
 
+  const handleSubmit = preventDefault(() => {
+    setStringifiedCookie('cart', []);
+    props.setCartCounter(0);
+    router
+      .push({
+        pathname: action,
+      })
+      .catch(() => {
+        console.log('Error, could not complete the action');
+      });
+  });
+
   return (
-    <Layout>
+    <>
       <Head>
         <title>Checkout</title>
         <meta
@@ -91,97 +180,114 @@ export default function checkout(props) {
         />
       </Head>
       <main css={mainStyles}>
-        <div>
-          <h1>Checkout</h1>
-
+        <h1>Checkout</h1>
+        <div css={sectionsStyles}>
           <div>
-            Selected products:
-            {props.cart.map((productInCart) => {
-              return (
-                <div key={`item-${productInCart.id}`}>
-                  <span>
-                    {
-                      props.products.find((product) => {
-                        return productInCart.id === product.id;
-                      }).name
-                    }
-                  </span>
-                  <span>
-                    Price:
-                    {
-                      props.products.find((product) => {
-                        return productInCart.id === product.id;
-                      }).price
-                    }{' '}
-                    €
-                  </span>
-                  Amount:
-                  <span>{productInCart.quantity}</span>
-                  <span>
-                    Total:
-                    {calculateTotalSum()} €
-                  </span>
-                </div>
-              );
-            })}
+            <div css={firstSectionStyles}>
+              <h2>Product information</h2>
+              <div>
+                {props.cart.map((productInCart) => {
+                  return (
+                    <div key={`item-${productInCart.id}`}>
+                      <div>
+                        <Image
+                          src={`/${productInCart.id}.jpg`}
+                          width={300}
+                          height={180}
+                        />
+                      </div>
+                      <br />
+                      <div>
+                        <strong>Selected products:&nbsp; </strong>
+                        {
+                          props.products.find((product) => {
+                            return productInCart.id === product.id;
+                          }).name
+                        }
+                      </div>
+                      <br />
+                      <div>
+                        <strong>Price:&nbsp;</strong>
+                        {
+                          props.products.find((product) => {
+                            return productInCart.id === product.id;
+                          }).price
+                        }{' '}
+                        €
+                      </div>
+                      <br />
+                      <div>
+                        <strong>Amount:&nbsp;</strong> {productInCart.quantity}
+                      </div>
+                      <br />
+                      <div>
+                        <strong>Total:&nbsp;</strong>
+                        {calculateTotalSum()} €
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
-        </div>
-        <div>
-          <h2>Your information</h2>
-          <div>
-            <form css={formStyles}>
-              <div>
-                <div css={formWrapperStyles}>
-                  <label>
-                    <span>First name</span>
-                    <input required />
-                  </label>
-                  <label>
-                    <span>Last name</span>
-                    <input required />
-                  </label>
+
+          <div css={secondSectionStyles}>
+            <h2>Your information</h2>
+            <div>
+              <form css={formStyles} onSubmit={handleSubmit}>
+                <div>
+                  <div css={formWrapperStyles}>
+                    <label>
+                      <span>First name</span>
+                      <input required />
+                    </label>
+                    <label>
+                      <span>Last name</span>
+                      <input required />
+                    </label>
+                  </div>
+                  <div css={formWrapperStyles}>
+                    <label>
+                      <span>E-mail addresse</span>
+                      <input required />
+                    </label>
+                    <label>
+                      <span>City</span>
+                      <input required />
+                    </label>
+                    <label>
+                      <span>Postal code</span>
+                      <input required />
+                    </label>
+                    <label>
+                      <span>Country</span>
+                      <input required />
+                    </label>
+                  </div>
+                  <div css={formWrapperStyles}>
+                    <label>
+                      <span>Credit card number</span>
+                      <input required />
+                    </label>
+                    <label>
+                      <span>Expiration date</span>
+                      <input required />
+                    </label>
+                    <label>
+                      <span>Security code</span>
+                      <input required />
+                    </label>
+                  </div>
                 </div>
-                <div css={formWrapperStyles}>
-                  <label>
-                    <span>E-mail addresse</span>
-                    <input required />
-                  </label>
-                  <label>
-                    <span>City</span>
-                    <input required />
-                  </label>
-                  <label>
-                    <span>Postal code</span>
-                    <input required />
-                  </label>
-                  <label>
-                    <span>Country</span>
-                    <input required />
-                  </label>
+                <div>
+                  <button css={buttonStyles}>Confirm order</button>
                 </div>
-                <div css={formWrapperStyles}>
-                  <label>
-                    <span>Credit card number</span>
-                    <input required />
-                  </label>
-                  <label>
-                    <span>Expiration date</span>
-                    <input required />
-                  </label>
-                  <label>
-                    <span>Security code</span>
-                    <input required />
-                  </label>
-                </div>
-              </div>
-              <div>
-                <button css={buttonStyles}>Confirm order</button>
-              </div>
-            </form>
+              </form>
+            </div>
           </div>
         </div>
       </main>
-    </Layout>
+    </>
   );
 }
 

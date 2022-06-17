@@ -4,6 +4,15 @@ import postgres from 'postgres';
 
 config();
 
+export type DatabaseType = {
+  name: string;
+  type: string;
+  status: string;
+  id: number;
+  price: number;
+  inStockQuantity: number;
+};
+
 declare module globalThis {
   let postgresSqlClient: ReturnType<typeof postgres> | undefined;
 }
