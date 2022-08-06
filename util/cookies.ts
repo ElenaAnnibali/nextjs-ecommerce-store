@@ -1,17 +1,21 @@
 import Cookies from 'js-cookie';
-import { CartItem } from '../pages/bikes/[bikeId]';
+
+export type CartItem = {
+  id: number;
+  quantity: number;
+};
 
 export function getParsedCookie(key: string) {
   const cookieValue = Cookies.get(key);
 
   if (!cookieValue) {
-    return undefined;
+    return [];
   }
 
   try {
     return JSON.parse(cookieValue);
   } catch (err) {
-    return undefined;
+    return [];
   }
 }
 

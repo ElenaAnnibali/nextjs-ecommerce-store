@@ -1,11 +1,14 @@
 import { css } from '@emotion/react';
 import { GetServerSidePropsContext } from 'next';
+// import Cookies from 'js-cookie';
+// import { GetServerSidePropsContext } from 'next';
 import Head from 'next/head';
 import Image from 'next/image';
-import { ChangeEvent, useState } from 'react';
-import { DatabaseType, getBike } from '../../util/bikesDatabase';
+import { useRef, useState } from 'react';
+import { getBike } from '../../util/bikesDatabase';
 import { getParsedCookie, setStringifiedCookie } from '../../util/cookies';
-import { queryParamToNumber } from '../../util/queryParam';
+
+// import { queryParamToNumber } from '../../util/queryParam';
 
 const mainStyles = css`
   min-height: 80vh;
@@ -154,30 +157,36 @@ const inputStyles = css`
   }
 `;
 
-export type CartItem = {
-  id: string | number;
-  quantity: number;
+type DatabasePruductsProps = {
+  id: number;
+  name: string;
+  type: string;
+  status: string;
+  price: string;
+  inStockQuantity: string;
 };
 
 type Props = {
-  superProduct: DatabaseType;
+  product: DatabasePruductsProps;
   cartCounter: number;
   setCartCounter?: any;
+  status?: number;
 };
 
 export default function Bike(props: Props) {
-  const [selectedQuantity, setSelectedQuantity] = useState(
-    props.superProduct.inStockQuantity | 1,
-  );
+  console.log('produtId props are:', props);
+  const [selectedQuantity, setSelectedQuantity] = useState(1);
   console.log('selected quantity: ', selectedQuantity);
 
-  function handleChange(event: ChangeEvent<HTMLInputElement>) {
-    setSelectedQuantity(Number(event.currentTarget.value));
-    const currentCart = getParsedCookie('cart') ? getParsedCookie('cart') : [];
-    setStringifiedCookie('cart', currentCart);
-  }
+  // function handleChange(event) {
+  //   setSelectedQuantity(Number(event.currentTarget.value));
+  //   const currentCart = getParsedCookie('cart') ? getParsedCookie('cart') : [];
+  //   setStringifiedCookie('cart', currentCart);
+  // }
 
-  if (!props.superProduct) {
+  const amountInput = useRef<null | HTMLInputElement>(null);
+
+  if (props.status === 404) {
     return (
       <div>
         <Head>
@@ -196,17 +205,17 @@ export default function Bike(props: Props) {
   return (
     <>
       <Head>
-        <title>{props.superProduct.name}</title>
+        <title>{props.product.name}</title>
         <meta
           name="description"
-          content={`${props.superProduct.name} is a ${props.superProduct.type}. ${props.superProduct.status}`}
+          content={`${props.product.name} is a ${props.product.type}. ${props.product.status}`}
         />
       </Head>
       <main css={mainStyles}>
         <div css={marginTopStyles}>
           <div css={titleSectionStyles}>
             <div>
-              <h1 css={h1Styles}>{props.superProduct.name}</h1>
+              <h1 css={h1Styles}>{props.product.name}</h1>
             </div>
           </div>
         </div>
@@ -216,7 +225,7 @@ export default function Bike(props: Props) {
             <Image
               className="image"
               data-test-id="product-image"
-              src={`/${props.superProduct.id}.jpg`}
+              src={`/${props.product.id}.jpg`}
               width={1200}
               height={800}
             />
@@ -224,16 +233,16 @@ export default function Bike(props: Props) {
           <div css={infoButtonStyles}>
             <div css={infoStyles}>
               <div>
-                <strong>type:</strong> {props.superProduct.type}
+                <strong>type:</strong> {props.product.type}
               </div>
               <div>
-                <strong>description:</strong> {props.superProduct.status}
+                <strong>description:</strong> {props.product.status}
               </div>
               <div data-test-id="product-price">
-                <strong>price:</strong> {props.superProduct.price} €
+                <strong>price:</strong> {props.product.price} €
               </div>
               <div>
-                <strong>in stock:</strong> {props.superProduct.inStockQuantity}
+                <strong>in stock:</strong> {props.product.inStockQuantity}
               </div>
             </div>
 
@@ -242,12 +251,23 @@ export default function Bike(props: Props) {
                 <label>
                   Quantity:
                   <input
+                    disabled={
+                      Number(props.product.inStockQuantity) === 0 ? true : false
+                    }
                     type="number"
+                    ref={amountInput}
                     name="quantity"
                     min="1"
-                    max={props.superProduct.inStockQuantity}
+                    max={props.product.inStockQuantity}
                     defaultValue="1"
-                    onChange={handleChange}
+                    onInput={(event) => {
+                      if (!event.currentTarget.validity.valid) {
+                        event.currentTarget.value = '';
+                      }
+                    }}
+                    onChange={(event) => {
+                      setSelectedQuantity(Number(event.currentTarget.value));
+                    }}
                     css={inputStyles}
                   />
                 </label>
@@ -256,37 +276,74 @@ export default function Bike(props: Props) {
                 data-test-id="product-add-to-cart"
                 css={buttonStyles}
                 onClick={() => {
-                  const currentCart = getParsedCookie('cart')
-                    ? getParsedCookie('cart')
-                    : [];
+                  // // cookies
+                  // const currentCart = Cookies.get('cart')
+                  //   ? getParsedCookie('cart')
+                  //   : [];
+                  // if (
+                  //   currentCart.find((cookie) => cookie.id === props.product.id)
+                  // ) {
+                  //   const updatedCart = [
+                  //     ...currentCart,
+                  //     {
+                  //       id: props.product.id,
+                  //       quantity: selectedQuantity,
+                  //     },
+                  //   ];
+                  //   setStringifiedCookie('cart', currentCart);
+                  //   props.setCartCounter(updatedCart);
+                  // } else {
+                  //   const updatedProductInCart = currentCart.find(
+                  //     (cookie) => cookie.id === props.product.id,
+                  //   );
+                  //   updatedProductInCart.quantity += selectedQuantity;
+                  //   // [
+                  //   //   ...currentCart,
+                  //   //   {
+                  //   //     id: props.product.id,
+                  //   //     quantity: selectedQuantity,
+                  //   //   },
+                  //   // ];
+                  //   setStringifiedCookie('cart', currentCart);
+                  //   props.setCartCounter(currentCart);
+                  //   console.log(currentCart);
+                  // }
+                  const currentCart = getParsedCookie('cart');
+                  // ? getParsedCookie('cart')
+                  // : [];
                   console.log(currentCart);
 
                   const selectedBike = currentCart.find(
-                    (bike: CartItem) => bike.id === props.superProduct.id,
+                    (bike: DatabasePruductsProps) =>
+                      bike.id === props.product.id,
                   );
 
                   if (selectedBike) {
                     selectedBike.quantity =
                       Number(selectedBike.quantity) + Number(selectedQuantity);
                     console.log(currentCart);
-                    setStringifiedCookie('cart', currentCart);
                     props.setCartCounter(
-                      Number(props.cartCounter) + Number(selectedQuantity),
+                      props.cartCounter + Number(selectedQuantity),
                     );
+                    setStringifiedCookie('cart', currentCart);
                   } else {
                     const updatedCart = [
                       ...currentCart,
                       {
-                        id: props.superProduct.id,
-                        // name: props.bike.name,
+                        id: props.product.id,
                         quantity: selectedQuantity,
                       },
                     ];
                     setStringifiedCookie('cart', updatedCart);
-                    props.setCartCounter(Number(props.cartCounter) + 1);
                     console.log(updatedCart);
                   }
                 }}
+                disabled={
+                  Number(selectedQuantity) >=
+                  Number(props.product.inStockQuantity)
+                    ? true
+                    : false
+                }
               >
                 Shop now
               </button>
@@ -299,28 +356,14 @@ export default function Bike(props: Props) {
 }
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
-  const bikeId = queryParamToNumber(context.query.bikeId);
+  // const bikeId = queryParamToNumber(context.query.bikeId);
 
-  const cart = JSON.parse(context.req.cookies.cart || '[]');
-
-  const product = await getBike(bikeId);
-
-  if (!product) {
-    context.res.statusCode = 404;
-    return {
-      props: {
-        superProduct: null,
-      },
-    };
-  }
-
-  const productInCart = cart.find((item: CartItem) => product.id === item.id);
-
-  const superProduct = { ...product, ...productInCart };
+  const product = await getBike(Number(context.query.bikeId));
+  console.log('selected produt:', product);
 
   return {
     props: {
-      superProduct: superProduct,
+      product: product,
     },
   };
 }

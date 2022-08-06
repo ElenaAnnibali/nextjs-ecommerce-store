@@ -1,11 +1,10 @@
 import { css } from '@emotion/react';
-import Cookies from 'js-cookie';
 import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { createRef, useEffect, useRef, useState } from 'react';
 import { getBikes } from '../util/bikesDatabase';
-import { getParsedCookie, setStringifiedCookie } from '../util/cookies';
+import { setStringifiedCookie } from '../util/cookies';
 
 const mainStyles = css`
   min-height: 120vh;
@@ -21,8 +20,8 @@ const spanStyles = css`
 `;
 
 const articleStyles = css`
-  margin-left: 400px;
-  margin-right: 400px;
+  margin-left: 600px;
+  margin-right: 230px;
 `;
 
 const spanPriceStyles = css`
@@ -89,11 +88,15 @@ const imageStyles = css`
 `;
 
 const priceStyles = css`
-  margin-right: 30px;
+  margin-right: 15px;
+  margin-left: 15px;
+  font-size: 20px;
+  margin-top: 50px;
 `;
 
-const quantityStyles = css`
+const quantityContainerStyles = css`
   margin-right: 50px;
+  margin-top: 50px;
 
   div {
     display: flex;
@@ -102,14 +105,26 @@ const quantityStyles = css`
 `;
 
 const inStockQuantityStyles = css`
-  margin-right: 188px;
+  margin-right: 178px;
+  margin-left: 15px;
+  font-size: 20px;
+  margin-top: 50px;
+`;
+
+const quantityStyles = css`
+  justify-content: center;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 20px;
+  margin-bottom: 20px;
+  margin-left: 40px;
+  padding: 5px 10px;
 `;
 
 const buttonStyles = css`
   align-items: center;
   appearance: none;
-  background-color: #fffbe8;
-  border: 1px solid #dbdbdb;
+  background-color: #e59276;
+  border: 1px solid #1f0000;
   border-radius: 0.375em;
   box-shadow: none;
   box-sizing: border-box;
@@ -159,8 +174,8 @@ const secondContainerStyles = css`
   button {
     align-items: center;
     appearance: none;
-    background-color: #fffbe8;
-    border: 1px solid #dbdbdb;
+    background-color: #e57676;
+    border: 1px solid #1f0000;
     border-radius: 0.375em;
     box-shadow: none;
     box-sizing: border-box;
@@ -210,50 +225,29 @@ const totalAmountAndPriceStyles = css`
   }
 `;
 
+export function totalSum(cartProducts, DatabaseProducts) {
+  let total = 0;
+  cartProducts.map((cartProduct) => {
+    return (total +=
+      DatabaseProducts.find((databaseProduct) => {
+        return cartProduct.id === databaseProduct.id;
+      }).price * cartProduct.quantity);
+  });
+  console.log('here is the total sum', total);
+  return total;
+}
+
 export default function Cart(props) {
-  const [productsInCart, setProductsInCart] = useState(props.findproducts);
+  const [productsInCart, setProductsInCart] = useState(props.cart);
   const [sum, setSum] = useState(0);
-  const [totalPrice, setTotalPrice] = useState(0);
-
-  // get cookies from shopping page with useEffect
-  useEffect(() => {
-    const currentCart = Cookies.get('cart') ? getParsedCookie('cart') : [];
-    setProductsInCart(currentCart);
-  }, []);
-
-  // calculate items in cart
-  let totalAmount = 0;
-  for (let i = 0; i < productsInCart.length; i++) {
-    totalAmount += productsInCart[i].quantity;
-  }
 
   useEffect(() => {
-    function calculateTotalPrice() {
-      let totalP = 0;
-      productsInCart.map((productInCart) => {
-        return (totalP += props.product.find((product) => {
-          return productInCart.id === product.id;
-        }).price);
-      });
-      setTotalPrice(totalP);
-    }
-    calculateTotalPrice();
-  }, [productsInCart, props.product]);
+    setSum(totalSum(productsInCart, props.products));
+  }, [productsInCart, props.products]);
 
-  // calculate Sum with UseEffect
-  // useEffect(() => {
-  //   function calculateGranTotalPrice() {
-  //     let total = 0;
-  //     productsInCart.map((productInCart) => {
-  //       return (total +=
-  //         props.product.find((product) => {
-  //           return productInCart.id === product.id;
-  //         }).price * productInCart.quantity);
-  //     });
-  //     setSum(total);
-  //   }
-  //   calculateGranTotalPrice();
-  // }, [productsInCart, props.product]);
+  // more infos about useRef and how to use it here: https://stackoverflow.com/questions/54940399/how-target-dom-with-react-useref-in-map/55105849
+
+  const refs = useRef([createRef(), createRef()]);
 
   return (
     <>
@@ -279,53 +273,71 @@ export default function Cart(props) {
                 <span>Quantity in stock</span>
                 <span css={spanPriceStyles}>Price</span>
                 <span>Quantity</span>
-                <span>Total</span>
+                {/* <span>Total</span> */}
               </div>
               <div>
-                {productsInCart.map((productInCart) => {
+                {productsInCart.map((productInCart, index) => {
                   return (
-                    <div key={`cart-${productInCart.id}`} css={containerStyles}>
+                    <div
+                      key={`cart-${productInCart.id}`}
+                      css={containerStyles}
+                      data-test-id={`cart-product-${productInCart.id}`}
+                    >
                       {/* <div>{productInCart.quantity}</div> */}
                       <div css={imageStyles}>
-                        <Image
-                          src={`/${productInCart.id}.jpg`}
-                          width={300}
-                          height={180}
-                        />
+                        <Link href={`/bikes/${productInCart.id}`} passHref>
+                          <a>
+                            <Image
+                              src={`/${productInCart.id}.jpg`}
+                              width={300}
+                              height={180}
+                            />
+                          </a>
+                        </Link>
                       </div>
                       <div css={nameAndRemoveStyles}>
                         {/* product name */}
                         <div>
-                          {
-                            props.products.find((product) => {
-                              return productInCart.id === product.id;
-                            }).name
-                          }
-                        </div>{' '}
+                          <Link href={`/bikes/${productInCart.id}`} passHref>
+                            <h3>
+                              {' '}
+                              {
+                                props.products.find((product) => {
+                                  return product.id === productInCart.id;
+                                }).name
+                              }
+                            </h3>
+                          </Link>
+                        </div>
                         {/* remove button */}
                         <button
                           css={buttonStyles}
+                          data-test-id={`cart-product-remove-${productInCart.id}`}
                           onClick={() => {
                             const updatedCart = productsInCart.filter(
                               (product) => {
                                 return product.id !== productInCart.id;
                               },
                             );
-                            console.log(
-                              'after removing the product: ',
-                              updatedCart,
-                            );
+
+                            console.log('new cart state:', updatedCart);
                             setStringifiedCookie('cart', updatedCart);
                             setProductsInCart(updatedCart);
+
+                            props.setCartCounter(
+                              props.cartCounter -
+                                Number(refs.current[index].current?.value),
+                            );
                           }}
                         >
                           remove
                         </button>
                       </div>
+                      {/* product InStockQuantity */}
                       <div css={inStockQuantityStyles}>
                         {
                           props.products.find((product) => {
-                            return productInCart.id === product.id;
+                            return product.id === productInCart.id;
                           }).inStockQuantity
                         }
                       </div>
@@ -335,93 +347,46 @@ export default function Cart(props) {
                           props.products.find((product) => {
                             return productInCart.id === product.id;
                           }).price
-                        }{' '}
-                        €
+                        }
+                        {productInCart.price}€
                       </div>
 
-                      <div css={quantityStyles}>
+                      <div css={quantityContainerStyles}>
                         <div>
-                          <button
-                            css={buttonStyles}
-                            onClick={() => {
-                              const updatedCart = productsInCart.find(
-                                (product) => product.id === productInCart.id,
-                              );
-                              const inStockQuantity = props.products.find(
-                                (product) => productInCart.id === product.id,
-                              ).inStockQuantity;
-                              console.log(
-                                'In stock quantity:',
-                                inStockQuantity,
-                              );
-
-                              const totalP = props.products.find(
-                                (product) => productInCart.id === product.id,
-                              ).price;
-
-                              const priceSum =
-                                updatedCart.quantity < inStockQuantity
-                                  ? totalPrice + Number(totalP)
-                                  : totalPrice;
-                              console.log('price Sum ', priceSum);
-
-                              updatedCart.quantity < inStockQuantity
-                                ? (updatedCart.quantity += 1)
-                                : (updatedCart.quantity += 0);
-
-                              setStringifiedCookie('cart', productsInCart);
-                              setProductsInCart([...productsInCart]);
-                              props.setCartCounter(
-                                Number(props.cartCounter) ===
-                                  updatedCart.quantity,
-                              );
-                              setTotalPrice(priceSum);
+                          <input
+                            type="number"
+                            css={quantityStyles}
+                            ref={refs.current[index]}
+                            min="1"
+                            max={
+                              props.products.find((product) => {
+                                return productInCart.id === product.id;
+                              }).inStockQuantity
+                            }
+                            defaultValue={productInCart.quantity}
+                            onInput={(event) => {
+                              if (!event.currentTarget.validity.valid) {
+                                event.current.target.value = '';
+                              }
                             }}
-                          >
-                            +
-                          </button>
-                          <span>{props.cartCounter}</span>
-                          <button
-                            css={buttonStyles}
-                            onClick={() => {
-                              const updatedCart = productsInCart.find(
-                                (product) => product.id === productInCart.id,
-                              );
-
-                              updatedCart.quantity > 0
-                                ? (updatedCart.quantity -= 1)
-                                : (updatedCart.quantity -= 0);
-
-                              const totalP = props.product.find(
-                                (product) => productInCart.id === product.id,
-                              ).price;
-
-                              const priceSum =
-                                totalPrice > 0
-                                  ? totalPrice - Number(totalP)
-                                  : totalPrice;
-                              console.log('price Sum ', priceSum);
-
-                              setStringifiedCookie('cart', productsInCart);
-                              setProductsInCart([...productsInCart]);
-                              props.setCartCounter(
-                                Number(props.cartCounter) - 1,
-                              );
-                              setTotalPrice(priceSum);
+                            onChange={(event) => {
+                              console.log(event);
+                              const updatedCart = productsInCart.slice();
+                              updatedCart.find((product) => {
+                                return product.id === productInCart.id;
+                              }).quantity = Number(event.currentTarget.value);
+                              let updatedQuantity = 0;
+                              for (let i = 0; i < updatedCart.length; i++) {
+                                updatedQuantity += updatedCart[i].quantity;
+                              }
+                              console.log('updated quantity', updatedQuantity);
+                              props.setCartCounter(updatedQuantity);
+                              console.log('new cart state', updatedCart);
+                              setStringifiedCookie('cart', updatedCart);
+                              setProductsInCart(updatedCart);
                             }}
-                          >
-                            {' '}
-                            -{' '}
-                          </button>
+                          />
                         </div>
-                      </div>
-                      <div>
-                        {Number(
-                          productsInCart.find(
-                            (product) => product.id === productInCart.id,
-                          ).quantity,
-                        ) * Number(totalPrice)}
-                        €
                       </div>
                     </div>
                   );
@@ -430,8 +395,7 @@ export default function Cart(props) {
               <div>
                 <div css={secondContainerStyles}>
                   <div css={totalAmountAndPriceStyles}>
-                    <span>Total amount: {totalAmount}</span>
-                    <span>Total Price: {sum}</span>
+                    <span>Total Price: {Math.round(sum)}</span>
                   </div>
                   <div css={shopCheckoutStyles}>
                     <Link href="/shop">
@@ -452,31 +416,16 @@ export default function Cart(props) {
 }
 
 export async function getServerSideProps(context) {
-  const product = await getBikes();
+  // bikes on database
+  const databaseBikes = await getBikes();
 
+  // cart cookie
   const cart = JSON.parse(context.req.cookies.cart || '[]');
-
-  const foundproducts = [];
-
-  for (const cartProduct in cart) {
-    const productFromDB = product.find((item) => {
-      return item.id === cartProduct.id;
-    });
-    if (!productFromDB) {
-      console.log(
-        'An error occured: could not find the requested product in the datatbase',
-      );
-      context.res.statusCode = 404;
-      break;
-    }
-    const superProduct = { ...productFromDB, ...cartProduct };
-
-    foundproducts.push(superProduct);
-  }
 
   return {
     props: {
-      foundproducts: foundproducts,
+      cart: cart,
+      products: databaseBikes,
     },
   };
 }

@@ -63,20 +63,27 @@ const iconStyles = css`
 
 const cartCounterStyles = css`
   cursor: pointer;
+  font-size: 14px;
+  margin-left: -35px;
+  padding: 1px;
+  border-width: 1px;
+  border-color: #000;
+  border-style: solid;
+  border-radius: 50px;
+  background-color: #feffeb;
 
   span {
     position: relative;
-    top: 2px;
   }
 `;
 
 export default function Header(props) {
-  const cartCounterProps = props.cartCounter;
+  // const cartCounterProps = props.cartCounter;
 
-  let showAmount = 0;
-  for (let i = 0; i < cartCounterProps.length; i++) {
-    showAmount += cartCounterProps[i].quantity;
-  }
+  // let showAmount = 0;
+  // for (let i = 0; i < cartCounterProps.length; i++) {
+  //   showAmount += cartCounterProps[i].quantity;
+  // }
 
   return (
     <header css={headerStyles}>
@@ -90,7 +97,8 @@ export default function Header(props) {
             <span className="material-symbols-outlined">favorite</span>
             <Link href="/cart">
               <span className="material-symbols-outlined">
-                shopping_bag <span css={cartCounterStyles}>{showAmount}</span>
+                shopping_bag{' '}
+                <span css={cartCounterStyles}>{props.cartCounter}</span>
               </span>
             </Link>
           </div>
