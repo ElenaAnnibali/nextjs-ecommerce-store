@@ -1,3 +1,4 @@
+/** @jsxImportSource @emotion/react */
 import { css } from '@emotion/react';
 import { GetServerSidePropsContext } from 'next';
 // import Cookies from 'js-cookie';
