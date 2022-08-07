@@ -5,12 +5,10 @@ import Link from 'next/link';
 const headerStyles = css`
   display: flex;
   flex-direction: column;
-  padding: 4px 8px;
   display: flex;
   justify-content: space-between;
   gap: 10px;
   font-size: 20px;
-  padding-right: 20px;
   font-family: 'Quicksand', sans-serif;
   background-color: #fefbed !important;
 
@@ -29,6 +27,7 @@ const logoStyles = css`
 
   div {
     margin-left: 560px;
+    margin-right: 40px;
   }
 `;
 
@@ -78,13 +77,6 @@ const cartCounterStyles = css`
 `;
 
 export default function Header(props) {
-  // const cartCounterProps = props.cartCounter;
-
-  // let showAmount = 0;
-  // for (let i = 0; i < cartCounterProps.length; i++) {
-  //   showAmount += cartCounterProps[i].quantity;
-  // }
-
   return (
     <header css={headerStyles}>
       <div>

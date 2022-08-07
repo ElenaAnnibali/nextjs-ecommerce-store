@@ -50,7 +50,9 @@ const twinSectionStyles = css`
 `;
 
 const productStyles = css`
-  max-width: 775.38px;
+  width: 1200px;
+  margin: 0;
+  padding: 0;
   border-right: 1px solid #2b3826;
 `;
 
@@ -228,7 +230,7 @@ export default function Bike(props: Props) {
               data-test-id="product-image"
               src={`/${props.product.id}.jpg`}
               width={1200}
-              height={800}
+              height={786}
             />
           </div>
           <div css={infoButtonStyles}>
@@ -277,41 +279,8 @@ export default function Bike(props: Props) {
                 data-test-id="product-add-to-cart"
                 css={buttonStyles}
                 onClick={() => {
-                  // // cookies
-                  // const currentCart = Cookies.get('cart')
-                  //   ? getParsedCookie('cart')
-                  //   : [];
-                  // if (
-                  //   currentCart.find((cookie) => cookie.id === props.product.id)
-                  // ) {
-                  //   const updatedCart = [
-                  //     ...currentCart,
-                  //     {
-                  //       id: props.product.id,
-                  //       quantity: selectedQuantity,
-                  //     },
-                  //   ];
-                  //   setStringifiedCookie('cart', currentCart);
-                  //   props.setCartCounter(updatedCart);
-                  // } else {
-                  //   const updatedProductInCart = currentCart.find(
-                  //     (cookie) => cookie.id === props.product.id,
-                  //   );
-                  //   updatedProductInCart.quantity += selectedQuantity;
-                  //   // [
-                  //   //   ...currentCart,
-                  //   //   {
-                  //   //     id: props.product.id,
-                  //   //     quantity: selectedQuantity,
-                  //   //   },
-                  //   // ];
-                  //   setStringifiedCookie('cart', currentCart);
-                  //   props.setCartCounter(currentCart);
-                  //   console.log(currentCart);
-                  // }
                   const currentCart = getParsedCookie('cart');
-                  // ? getParsedCookie('cart')
-                  // : [];
+
                   console.log(currentCart);
 
                   const selectedBike = currentCart.find(

@@ -11,6 +11,11 @@ const mainStyles = css`
   padding-bottom: 30px;
 `;
 
+const borderStyles = css`
+  border-bottom: 1px solid #2b3826;
+  border-top: 1px solid #2b3826;
+`;
+
 const heroTextContainerStyles = css`
   display: flex;
   -webkit-font-smoothing: antialiased;
@@ -20,8 +25,7 @@ const heroTextContainerStyles = css`
   flex-basis: calc(100% * 8 / 12 - 1rem);
   max-width: calc(100% * 8 / 12 - 1rem);
   width: calc(100% * 8 / 12 - 1rem);
-  border-bottom: 1px solid #2b3826;
-  border-top: 1px solid #2b3826;
+
   margin-bottom: 0;
   padding-right: 568px;
   height: 90px;
@@ -146,18 +150,11 @@ export default function About() {
       </Head>
       <main css={mainStyles}>
         <section>
-          {/* <div css={bgWrapStyles}>
-            <Image
-              src="/about-title-2.jpg"
-              alt="bicycle illustration"
-              width={1200}
-              height={90}
-              layout="responsive"
-            />
-          </div> */}
-          <div css={heroTextContainerStyles}>
-            <div>
-              <h1 css={bgTextStyles}>About</h1>
+          <div css={borderStyles}>
+            <div css={heroTextContainerStyles}>
+              <div>
+                <h1 css={bgTextStyles}>About</h1>
+              </div>
             </div>
           </div>
         </section>
