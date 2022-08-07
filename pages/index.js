@@ -63,8 +63,8 @@ const rightSectionStyles = css`
   border-top: 1px solid #2b3826;
   font-family: 'Orbitron', sans-serif;
   text-align: justify;
-  font-size: 18px;
-  line-height: 1.26;
+  font-size: 20px;
+  line-height: 1.8;
   font-weight: 400;
 
   h2 {
@@ -190,8 +190,9 @@ export default function Home() {
             <div>
               <h2>Why second-hand bicycles?</h2>
               <p>
-                We strongly believe in the importance of a more sustainable
-                mobility system, and we stand for{' '}
+                Let's be honest: how can resist the glam of a new old bike?{' '}
+                <br /> But it's not just about beauty and style, we also care
+                about our planet and we stand for{' '}
                 <Link href="https://www.peopleformobilityjustice.org/">
                   mobility justice
                 </Link>
